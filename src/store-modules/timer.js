@@ -1,5 +1,3 @@
-import { resolve } from "dns";
-
 export default {
   namespaced: true,
   state: {
