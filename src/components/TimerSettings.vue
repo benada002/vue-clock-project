@@ -46,6 +46,7 @@
 </template>
 
 <script>
+import { required, integer, between, minValue } from "vuelidate/lib/validators";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -57,28 +58,73 @@ export default {
       breakTime: []
     };
   },
+  validations: {
+    time: {
+      $each: { required, integer },
+      array: {
+        "1": {
+          between: between(0, 59)
+        }
+      }
+    },
+    breakTime: {
+      $each: { required, integer },
+      array: {
+        "1": {
+          between: between(0, 59)
+        }
+      }
+    },
+    breaks: {
+      required,
+      integer,
+      minValue: 1
+    }
+  },
   computed: {
     ...mapGetters("Timer", ["getTime", "getData"])
   },
   watch: {
     breaks(val) {
-      val = Number.parseInt(val);
-      this.$store.commit("Timer/TimerSettings", ["timerConfBreaks", val]);
-      this.$store.commit("Timer/TimerSettings", ["lastTimerConfBreaks", val]);
+      if (!this.$v.breaks.$pending) {
+        if (this.$v.breaks.$invalid) {
+          return (this.breaks = this.$store.state.Timer.timerConfBreaks);
+        }
+        val = Number.parseInt(val);
+        this.$store.commit("Timer/TimerSettings", ["timerConfBreaks", val]);
+        this.$store.commit("Timer/TimerSettings", ["lastTimerConfBreaks", val]);
+      }
     },
     time(val) {
-      this.setupTimer([["timerConfTime", "lastTimerConfTime"], val]);
+      if (!this.$v.time.$pending) {
+        if (this.$v.time.$invalid) {
+          return (this.time = this.oldTime("timerConfTime"));
+        }
+        this.setupTimer([["timerConfTime", "lastTimerConfTime"], val]);
+      }
     },
     breakTime(val) {
-      this.setupTimer([["timerConfBreakTime", "lastTimerConfBreakTime"], val]);
+      if (!this.$v.breakTime.$pending) {
+        if (this.$v.breakTime.$invalid) {
+          return (this.breakTime = this.oldTime("timerConfBreakTime"));
+        }
+        this.setupTimer([
+          ["timerConfBreakTime", "lastTimerConfBreakTime"],
+          val
+        ]);
+      }
     }
   },
   methods: {
     ...mapActions("Timer", ["setupTimer"]),
-    twoNumbers(val) {
-      return Array.prototype.forEach.call(val, ele =>
-        ele.toString().padStart(2, "0")
-      );
+    oldTime(item) {
+      const obj = this.$store.state.Timer;
+
+      const min = Math.floor(obj[item] / 60);
+      const sec =
+        obj[item] - min * 60 < 1 && min < 1 ? 1 : obj[item] - min * 60;
+
+      return [min.toString().padStart(2, 0), sec.toString().padStart(2, 0)];
     }
   },
   mounted() {
