@@ -6,7 +6,13 @@
           <div class="container">
             <div class="row">
               <div class="col-12">
-                <input type="text" name="breaks" id v-model="breaks">
+                <input type="text" name="breaks" v-model="breaks">
+                <div class="error" v-if="!$v.breaks.required">Is required</div>
+                <div class="error" v-if="!$v.breaks.integer">Must be an integer</div>
+                <div
+                  class="error"
+                  v-if="!$v.breaks.minValue"
+                >Must be at least {{$v.breaks.$params.minValue.min}}</div>
               </div>
             </div>
           </div>
@@ -17,10 +23,14 @@
             <div class="row">
               <div class="col-5">
                 <input type="text" name="time" id v-model="time[0]">
+                <div class="error" v-if="!$v.time.$each[0].required">Is required</div>
+                <div class="error" v-if="!$v.time.$each[0].integer">Must be an integer</div>
               </div>
               <div class="col-2 colon">:</div>
               <div class="col-5">
                 <input type="text" name="time" id v-model="time[1]">
+                <div class="error" v-if="!$v.time.$each[1].required">Is required</div>
+                <div class="error" v-if="!$v.time.$each[1].integer">Must be an integer</div>
               </div>
             </div>
           </div>
@@ -31,10 +41,14 @@
             <div class="row">
               <div class="col-5">
                 <input type="text" name="breakTime" id v-model="breakTime[0]">
+                <div class="error" v-if="!$v.breakTime.$each[0].required">Is required</div>
+                <div class="error" v-if="!$v.breakTime.$each[0].integer">Must be an integer</div>
               </div>
               <div class="col-2 colon">:</div>
               <div class="col-5">
                 <input type="text" name="breakTime" id v-model="breakTime[1]">
+                <div class="error" v-if="!$v.breakTime.$each[1].required">Is required</div>
+                <div class="error" v-if="!$v.breakTime.$each[1].integer">Must be an integer</div>
               </div>
             </div>
           </div>
@@ -60,25 +74,15 @@ export default {
   },
   validations: {
     time: {
-      $each: { required, integer },
-      array: {
-        "1": {
-          between: between(0, 59)
-        }
-      }
+      $each: { required, integer }
     },
     breakTime: {
-      $each: { required, integer },
-      array: {
-        "1": {
-          between: between(0, 59)
-        }
-      }
+      $each: { required, integer }
     },
     breaks: {
       required,
       integer,
-      minValue: 1
+      minValue: minValue(1)
     }
   },
   computed: {
@@ -86,28 +90,19 @@ export default {
   },
   watch: {
     breaks(val) {
-      if (!this.$v.breaks.$pending) {
-        if (this.$v.breaks.$invalid) {
-          return (this.breaks = this.$store.state.Timer.timerConfBreaks);
-        }
+      if (!this.$v.breaks.$pending && !this.$v.breaks.$invalid) {
         val = Number.parseInt(val);
         this.$store.commit("Timer/TimerSettings", ["timerConfBreaks", val]);
         this.$store.commit("Timer/TimerSettings", ["lastTimerConfBreaks", val]);
       }
     },
     time(val) {
-      if (!this.$v.time.$pending) {
-        if (this.$v.time.$invalid) {
-          return (this.time = this.oldTime("timerConfTime"));
-        }
+      if (!this.$v.time.$pending && !this.$v.time.$invalid) {
         this.setupTimer([["timerConfTime", "lastTimerConfTime"], val]);
       }
     },
     breakTime(val) {
-      if (!this.$v.breakTime.$pending) {
-        if (this.$v.breakTime.$invalid) {
-          return (this.breakTime = this.oldTime("timerConfBreakTime"));
-        }
+      if (!this.$v.breakTime.$pending && !this.$v.breakTime.$invalid) {
         this.setupTimer([
           ["timerConfBreakTime", "lastTimerConfBreakTime"],
           val
@@ -125,6 +120,11 @@ export default {
         obj[item] - min * 60 < 1 && min < 1 ? 1 : obj[item] - min * 60;
 
       return [min.toString().padStart(2, 0), sec.toString().padStart(2, 0)];
+    },
+    validate() {
+      if (this.$v.time.$invalid) {
+        return (this.time = this.oldTime("timerConfTime"));
+      }
     }
   },
   mounted() {
@@ -169,5 +169,10 @@ input {
 .colon {
   color: #303f9f;
   font-size: 40px;
+}
+
+.error {
+  color: red;
+  font-size: 10px;
 }
 </style>
