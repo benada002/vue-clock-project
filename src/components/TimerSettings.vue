@@ -111,20 +111,6 @@ export default {
   },
   methods: {
     ...mapActions("Timer", ["setupTimer"]),
-    oldTime(item) {
-      const obj = this.$store.state.Timer;
-
-      const min = Math.floor(obj[item] / 60);
-      const sec =
-        obj[item] - min * 60 < 1 && min < 1 ? 1 : obj[item] - min * 60;
-
-      return [min.toString().padStart(2, 0), sec.toString().padStart(2, 0)];
-    },
-    validate() {
-      if (this.$v.time.$invalid) {
-        return (this.time = this.oldTime("timerConfTime"));
-      }
-    }
   },
   mounted() {
     this.breaks = this.$store.state.Timer.lastTimerConfBreaks;
