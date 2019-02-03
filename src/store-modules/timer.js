@@ -18,6 +18,7 @@ export default {
       return item => {
         const min = Math.floor(state[item] / 60);
         const sec = state[item] - min * 60;
+
         return `${min.toString().padStart(2, "0")}:${sec
           .toString()
           .padStart(2, "0")}`;
@@ -28,7 +29,9 @@ export default {
         let timePercent = Math.floor(
           (state.timerConfBreakTime * 100) / state.lastTimerConfBreakTime
         );
+
         let percent = 100 - timePercent;
+
         if (state.timerConfTime === 0) {
           percent = 0;
           timePercent = 100;
@@ -40,7 +43,9 @@ export default {
       let timePercent = Math.floor(
         (state.timerConfTime * 100) / state.lastTimerConfTime
       );
+
       let percent = 100 - timePercent;
+
       if (state.timerConfTime === 0 && !state.end) {
         percent = 0;
         timePercent = 100;
@@ -54,6 +59,7 @@ export default {
     TimerDecrement(state, payload) {
       state[payload]--;
     },
+
     TimerSettings(state, payload) {
       state[payload[0]] = payload[1];
     }
@@ -78,7 +84,7 @@ export default {
       commit("TimerSettings", ["pause", false]);
       return new Promise((resolve, reject) => {
         let interval = setInterval(() => {
-          if (!state.pause) {
+          if (state.timerRun && !state.pause) {
             commit("TimerDecrement", item);
 
             if (state[item] === 0) {
@@ -97,6 +103,7 @@ export default {
       if (state.timerConfBreaks === 0) {
         return;
       }
+
       commit("TimerSettings", ["end", false]);
       commit("TimerSettings", ["timerRun", true]);
 
@@ -141,8 +148,16 @@ export default {
       commit("TimerSettings", ["pause", true]);
     },
 
-    restart: state => {
-      state.Timer.time = state.timer.lastTime;
+    restart: ({ state, commit }) => {
+      commit("TimerSettings", ["timerRun", false]);
+      commit("TimerSettings", ["break", false]);
+      commit("TimerSettings", ["pause", false]);
+      commit("TimerSettings", ["timerConfTime", state.lastTimerConfTime]);
+      commit("TimerSettings", [
+        "timerConfBreakTime",
+        state.lastTimerConfBreakTime
+      ]);
+      commit("TimerSettings", ["timerConfBreaks", state.lastTimerConfBreaks]);
     }
   }
 };

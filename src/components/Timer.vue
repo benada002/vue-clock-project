@@ -19,18 +19,27 @@
     </div>
     <div class="container stbtn">
       <div class="row d-flex justify-content-center">
-        <button
-          @click="pauseTimer"
-          class="btn"
-          style="position: relative; z-index: 9999999;"
-          v-if="!pause && timerRun"
-        >Pause</button>
-        <button
-          @click="startTimer"
-          class="btn"
-          style="position: relative; z-index: 9999999;"
-          v-if="pause || !timerRun"
-        >Start Timer</button>
+        <div :class="timerRun ? 'col-6 d-flex' : 'col-12'">
+          <button
+            @click="pauseTimer"
+            class="btn flex-fill"
+            style="position: relative; z-index: 9999999;"
+            v-if="!pause && timerRun"
+          >Pause</button>
+          <button
+            @click="startTimer"
+            class="btn btn-success flex-fill"
+            style="position: relative; z-index: 9999999;"
+            v-if="pause || !timerRun"
+          >Start Timer</button>
+        </div>
+        <div v-if="timerRun" class="col-6 d-flex">
+          <button
+            @click="restart()"
+            class="btn btn-danger flex-fill"
+            style="position: relative; z-index: 9999999;"
+          >Reset</button>
+        </div>
       </div>
     </div>
   </div>
@@ -74,7 +83,7 @@ export default {
   },
 
   methods: {
-    ...mapActions("Timer", ["startTimer", "pauseTimer"])
+    ...mapActions("Timer", ["startTimer", "pauseTimer", "restart"])
   },
 
   mounted() {
