@@ -1,4 +1,4 @@
 # Vue Pomodoro Clock Project
 
-### Technologies
+### Used Technologies
 `Vue` `VueX` `vee-validate` `Chart.js` `Bootstrap`
