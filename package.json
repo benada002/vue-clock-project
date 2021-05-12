@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "bootstrap": "^4.3.1",
-    "chart.js": "^2.7.3",
+    "chart.js": "^2.9.4",
     "jquery": "^3.5.0",
     "popper.js": "^1.14.4",
     "vee-validate": "^2.1.7",
